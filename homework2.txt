@@ -1,0 +1,234 @@
+A playbook with Errors that needs to be fixed and writing another playbook:
+
+1. the playbook " httpd-install-with-errors.yaml " was written with errors, try to find out
+the errors, correct the playbook, and run it once all is corrected.
+
+2. write a playbook that copy a custom file " httpd.conf " which you already prepared in advance as a simple httpd configuration from a temporary location in control node to 
+" /etc/httpd/conf/httpd.conf " at the managed nodes
+with keeping a backup of current httpd.conf file before replacing it on the managed nodes. 
+Don't forget to restart httpd daemon and check that status.
+
+
+
+and backup index.html  and check url content
+
+
+[bogha@Master-node project-2]$ cat copy-http.yml 
+---
+- name : edit http file in servers
+  hosts: all
+  tasks:
+   - name: copy custom file  httpd.conf
+     copy:
+      src: index.html
+      dest: /var/www/html/
+      backup: yes
+     register: HTTP
+   - debug:
+      var: HTTP
+     notify: restart httpd
+
+
+   - name: check url
+     uri:
+      url: http://20.20.20.20
+      return_content: yes
+      status_code: 200
+     register: check
+   - debug: 
+      var: check
+
+  handlers:
+   - name: restart httpd
+     service:
+       name: httpd
+       state: restarted
+       enabled: yes
+
+
+
+
+
+
+[bogha@Master-node project-2]$ ansible-playbook  copy-http.yml 
+
+PLAY [edit http file in servers] ****************************************************************************************************************************
+
+TASK [copy custom file  httpd.conf] *************************************************************************************************************************
+Monday 30 December 2024  09:49:31 +0200 (0:00:00.009)       0:00:00.009 ******* 
+Monday 30 December 2024  09:49:31 +0200 (0:00:00.008)       0:00:00.008 ******* 
+changed: [20.20.20.40]
+changed: [20.20.20.30]
+changed: [20.20.20.20]
+
+TASK [debug] ************************************************************************************************************************************************
+Monday 30 December 2024  09:49:32 +0200 (0:00:01.109)       0:00:01.118 ******* 
+Monday 30 December 2024  09:49:32 +0200 (0:00:01.109)       0:00:01.117 ******* 
+ok: [20.20.20.20] => {
+    "HTTP": {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3.6"
+        },
+        "backup_file": "/var/www/html/index.html.202457.2024-12-30@09:49:42~",
+        "changed": true,
+        "checksum": "90bbdc8ba675ddba4d9b26d35f85e85ce5106994",
+        "dest": "/var/www/html/index.html",
+        "diff": [],
+        "failed": false,
+        "gid": 0,
+        "group": "root",
+        "md5sum": "9011901c4b1bba2fa8b73b0409af8a10",
+        "mode": "0644",
+        "owner": "root",
+        "size": 9,
+        "src": "/home/bogha/.ansible/tmp/ansible-tmp-1735544971.5983045-182015-179262496618639/source",
+        "state": "file",
+        "uid": 0
+    }
+}
+ok: [20.20.20.30] => {
+    "HTTP": {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3.6"
+        },
+        "backup_file": "/var/www/html/index.html.199170.2024-12-30@09:49:42~",
+        "changed": true,
+        "checksum": "90bbdc8ba675ddba4d9b26d35f85e85ce5106994",
+        "dest": "/var/www/html/index.html",
+        "diff": [],
+        "failed": false,
+        "gid": 0,
+        "group": "root",
+        "md5sum": "9011901c4b1bba2fa8b73b0409af8a10",
+        "mode": "0644",
+        "owner": "root",
+        "size": 9,
+        "src": "/home/bogha/.ansible/tmp/ansible-tmp-1735544971.6024857-182016-1791226412694/source",
+        "state": "file",
+        "uid": 0
+    }
+}
+ok: [20.20.20.40] => {
+    "HTTP": {
+        "ansible_facts": {
+            "discovered_interpreter_python": "/usr/bin/python3.6"
+        },
+        "backup_file": "/var/www/html/index.html.198800.2024-12-30@09:49:42~",
+        "changed": true,
+        "checksum": "90bbdc8ba675ddba4d9b26d35f85e85ce5106994",
+        "dest": "/var/www/html/index.html",
+        "diff": [],
+        "failed": false,
+        "gid": 0,
+        "group": "root",
+        "md5sum": "9011901c4b1bba2fa8b73b0409af8a10",
+        "mode": "0644",
+        "owner": "root",
+        "size": 9,
+        "src": "/home/bogha/.ansible/tmp/ansible-tmp-1735544971.6035078-182017-273962947274355/source",
+        "state": "file",
+        "uid": 0
+    }
+}
+
+PLAY RECAP **************************************************************************************************************************************************
+20.20.20.20                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+20.20.20.30                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+20.20.20.40                : ok=2    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
+
+
+PLAYBOOK RECAP **********************************************************************************************************************************************
+Playbook run took 0 days, 0 hours, 0 minutes, 1 seconds
+
+
+TASKS RECAP *************************************************************************************************************************************************
+Monday 30 December 2024  09:49:32 +0200 (0:00:00.084)       0:00:01.202 ******* 
+=============================================================================== 
+copy custom file  httpd.conf ------------------------------------------------------------------------------------------------------------------------- 1.11s
+debug ------------------------------------------------------------------------------------------------------------------------------------------------ 0.08s
+
+ROLES RECAP *************************************************************************************************************************************************
+Monday 30 December 2024  09:49:32 +0200 (0:00:00.084)       0:00:01.202 ******* 
+=============================================================================== 
+copy -------------------------------------------------------------------- 1.11s
+debug ------------------------------------------------------------------- 0.08s
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+total ------------------------------------------------------------------- 1.19s
+
+
+
+
+ 
+
+
+[bogha@Master-node project-2]$ ansible all -m shell -a "ls -la /var/www/html/"
+20.20.20.30 | CHANGED | rc=0 >>
+total 12
+drwxr-xr-x 2 root root 86 Dec 30 09:47 .
+drwxr-xr-x 4 root root 33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root 11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root 11 Dec 30 09:47 index.html
+-rw-r--r-- 1 root root 20 Dec 29 19:48 index.html.198096.2024-12-30@09:47:01~
+20.20.20.40 | CHANGED | rc=0 >>
+total 12
+drwxr-xr-x 2 root root 86 Dec 30 09:47 .
+drwxr-xr-x 4 root root 33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root 11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root 11 Dec 30 09:47 index.html
+-rw-r--r-- 1 root root 20 Dec 29 19:48 index.html.197713.2024-12-30@09:47:01~
+20.20.20.20 | CHANGED | rc=0 >>
+total 12
+drwxr-xr-x 2 root root 86 Dec 30 09:47 .
+drwxr-xr-x 4 root root 33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root 11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root 11 Dec 30 09:47 index.html
+-rw-r--r-- 1 root root 20 Dec 29 19:48 index.html.201370.2024-12-30@09:47:01~
+
+
+
+
+another edit
+
+
+[bogha@Master-node project-2]$ ansible all -m shell -a "ls -al  /var/www/html/"
+20.20.20.30 | CHANGED | rc=0 >>
+total 16
+drwxr-xr-x 2 root root 132 Dec 30 09:49 .
+drwxr-xr-x 4 root root  33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root  11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root   9 Dec 30 09:49 index.html
+-rw-r--r-- 1 root root  20 Dec 29 19:48 index.html.198096.2024-12-30@09:47:01~
+-rw-r--r-- 1 root root  11 Dec 30 09:47 index.html.199170.2024-12-30@09:49:42~
+20.20.20.20 | CHANGED | rc=0 >>
+total 16
+drwxr-xr-x 2 root root 132 Dec 30 09:49 .
+drwxr-xr-x 4 root root  33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root  11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root   9 Dec 30 09:49 index.html
+-rw-r--r-- 1 root root  20 Dec 29 19:48 index.html.201370.2024-12-30@09:47:01~
+-rw-r--r-- 1 root root  11 Dec 30 09:47 index.html.202457.2024-12-30@09:49:42~
+20.20.20.40 | CHANGED | rc=0 >>
+total 16
+drwxr-xr-x 2 root root 132 Dec 30 09:49 .
+drwxr-xr-x 4 root root  33 Dec 26 11:35 ..
+-rw-r--r-- 1 root root  11 Dec 30 09:46 amr.conf
+-rw-r--r-- 1 root root   9 Dec 30 09:49 index.html
+-rw-r--r-- 1 root root  20 Dec 29 19:48 index.html.197713.2024-12-30@09:47:01~
+-rw-r--r-- 1 root root  11 Dec 30 09:47 index.html.198800.2024-12-30@09:49:42~
+[bogha@Master-node project-2]$ 
+
+
+
+
+
+[bogha@node-1 html]$ cat  index.html.201370.2024-12-30@09\:47\:01~ 
+Seirver HTTPD allowd[bogha@node-1 html]$ 
+[bogha@node-1 html]$ 
+[bogha@node-1 html]$ 
+[bogha@node-1 html]$ 
+[bogha@node-1 html]$ cat  index.html.20
+index.html.201370.2024-12-30@09:47:01~  index.html.202457.2024-12-30@09:49:42~  
+[bogha@node-1 html]$ cat  index.html.202457.2024-12-30@09\:49\:42~ 
+test httpd
+[bogha@node-1 html]$ cat  index.html
+new test
